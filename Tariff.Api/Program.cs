@@ -13,6 +13,18 @@ builder.Services.AddScoped<ITariffComparisonService, TariffComparisonService>();
 // Register external tariff provider (mock or real)
 builder.Services.AddScoped<IExternalTariffProvider, ExternalTariffProviderMock>();
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()// todo: need to allow specific origins
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -20,16 +32,19 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 
 app.UseAuthorization();
+// Use CORS
+app.UseCors("AllowAllOrigins");
 
 app.MapControllers();
+
 
 app.Run();
